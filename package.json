@@ -1,0 +1,48 @@
+{
+  "name": "outlook.office.com",
+  "productName": "Outlook for Office.com",
+  "version": "1.0.14",
+  "description": "Outlook for Office.com Desktop application",
+  "main": "src/main.js",
+  "author": "Mark Flavin",
+  "email": "mflavin@mlslistings.com",
+  "repository": "",
+  "license": "MIT",
+  "keywords": [
+    "Electron",
+    "Outlook",
+    "Microsoft",
+    "Outlook Desktop"
+  ],
+  "scripts": {
+    "start": "electron src/main.js",
+    "pack": "electron-builder --dir",
+    "dist:linux": "electron-builder --linux deb",
+    "dist:macOS": "electron-builder --mac",
+    "dist:win": "electron-builder --win",
+    "postinstall": "electron-builder install-app-deps",
+    "publish": "build -p always"
+  },
+  "devDependencies": {
+    "electron": "^6.0.9",
+    "electron-builder": "^21.2.0"
+  },
+  "dependencies": {
+    "electron-settings": "^3.2.0",
+    "electron-spellchecker": "^2.2.0"
+  },
+  "build": {
+    "appId": "outlook.office.com",
+    "linux": {
+      "category": "Office",
+      "maintainer": "mflavin@mlslistings.com",
+      "desktop": {
+        "StartupWMClass": "Outlook for Office.com Desktop application"
+      },
+      "target": "deb"
+    },
+    "win": {
+      "target": "msi"
+    }
+  }
+}

@@ -153,29 +153,50 @@ class MailWindowController {
                 window.webContents.executeJavaScript(`
                 setTimeout(() => {
 
+                    // Include Electron
                     const remote = require('electron');
-                    var notificationPopup = document.querySelector('._5Ez5NZLdAGVg-9Gv0b5ct')
 
+                    // Track the notification and unread indicator elements
+                    var notificationPopup = document.querySelector('._5Ez5NZLdAGVg-9Gv0b5ct')
+                    var unreadNumber = document.querySelector('._3Jn_7Iv4SwMTMOPJiydZLa');
+
+                    // Send an initial unread status message to update our tray icon
+                    remote.ipcRenderer.send('updateUnread', unreadNumber.hasChildNodes());
+
+                    // Create the observer for the system notification of an unread message
                     var observer = new MutationObserver(function(mutation) {
                         mutation.forEach(function(mutation) {
-                        mutation.addedNodes.forEach(
-                                function(node) {
-                                    let sender = node.querySelector('._6tY-cxX-513mYdh6yJLFJ');
-                                    let message = node.querySelector('._3D_rMrrL9OQqN4yRDBU0wB');
-                                    if(sender) {
-                                        var notification = new Notification(sender.innerText, {
-                                            body: message.innerText
-                                        });
-                                        notification.onclick = () => {
-                                            remote.ipcRenderer.send('show');
-                                        };
-                                    }
+                            mutation.addedNodes.forEach(function(node) {
+                                //Parse the notification element
+                                let sender = node.querySelector('._6tY-cxX-513mYdh6yJLFJ');
+                                let message = node.querySelector('._3D_rMrrL9OQqN4yRDBU0wB');
+                                if(sender) {
+                                    // Show the user a message
+                                    var notification = new Notification(sender.innerText, {
+                                        body: message.innerText
+                                    });
+                                    notification.onclick = () => {
+                                        remote.ipcRenderer.send('show');
+                                    };
                                 }
-                                );
-                        });
+                            });
+                        })
                     });
+
+                    // If we have an unread item we should display a unread icon in the tray
+                    var unreadObserver = new MutationObserver(function(mutation){
+                        mutation.forEach(function(mutation){
+                            // Event for updating the tray icon (true shows unread, false shows default)
+                            remote.ipcRenderer.send('updateUnread', unreadNumber.hasChildNodes());
+                        })
+                    });
+
+                    // Implement our observers
                     observer.observe(notificationPopup, {subtree: true, childList: true});
-                }, 10000);
+                    unreadObserver.observe(unreadNumber, {subtree: true, childList: true});
+                    
+
+                }, 5000);
                 `);
             });
         }
